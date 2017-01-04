@@ -2,6 +2,7 @@
 
 import os
 import operator
+import numpy as np
 from matplotlib import pyplot
 from pylab import *
 
@@ -17,7 +18,7 @@ matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18)
 matplotlib.rcParams['axes.linewidth'] = 2
 
-FILE_PATH = "/Users/mama/Downloads/Python/MBPD"
+FILE_PATH = ""
 
 
 def _format_file_content(files):
@@ -28,12 +29,13 @@ def _format_file_content(files):
         file_path = os.path.join(FILE_PATH, single_file)
         new_path = "%s.new" % file_path
         if os.path.exists(file_path):
-            with open(file_path, 'rw') as original_file:
+            with open(file_path, 'r+') as original_file:
                 with open(new_path, 'w') as new_file:
                     for line in original_file.readlines():
                         slitted_line = line.split(',')
                         if len(slitted_line) == 2:
                             new_file.write(line)
+            os.remove(file_path)
             os.rename(new_path, file_path)
 
 
@@ -83,13 +85,13 @@ def _plot(target_files):
             except Exception, e:
                 print "Couldn't plot data, %s, Label(%s)" % (str(e), label)
     _update_legend()
-    pyplot.show()
     pyplot.xlim(550, 750)
     pyplot.ylim(0, 2)
 
     pyplot.xlabel('Wavelength, nm', fontsize=18, fontweight='bold')
     pyplot.ylabel('Absorbance, abs', fontsize=18, fontweight='bold')
     pyplot.title("$0.075g$ $ Ta_3N_5$ (Inhouse) Assisted $ 5$ $ ppm$ MBPD", fontsize=20, fontweight='bold')
+    pyplot.show()
 
 
 def main():

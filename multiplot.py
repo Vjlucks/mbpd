@@ -3,6 +3,7 @@
 import os
 import operator
 import numpy as np
+import glob
 from matplotlib import pyplot
 from pylab import *
 
@@ -59,13 +60,6 @@ def _get_data_in_ordered_list_to_draw(files):
     return data_list
 
 
-def _get_text_files():
-    """
-    returns a list of .txt files located in <FILE_PATH>
-    """
-    return [os.path.join(FILE_PATH, f) for f in os.listdir(FILE_PATH) if str(f).endswith('.txt')]
-
-
 def _update_legend():
     """
     updates legends
@@ -96,7 +90,7 @@ def _plot(target_files):
 
 def main():
     print 'generating documents from text file'
-    target_files = _get_text_files()
+    target_files = glob.glob("%s/*.txt" % FILE_PATH)
 
     print 'plotting data...'
     _plot(target_files)

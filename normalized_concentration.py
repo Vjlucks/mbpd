@@ -107,7 +107,6 @@ def _show_plot():
 def main():
     print 'preparing data to plot'
     _prepare_data()
-    _prepare_data()
 
     print 'constructing time intervals'
     t = _construct_time_intervals()

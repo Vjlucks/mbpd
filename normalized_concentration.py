@@ -16,10 +16,21 @@ BASE_DIR = "/Users/lekhnathkhanal/Downloads/Python"
 LOCAL_MAXIMUMS = []
 
 
+def _get_label_text():
+    label_items = []
+    if os.path.exists(BASE_DIR):
+        local_dirs = os.listdir(BASE_DIR)
+        for single_folder in local_dirs:
+            single_item = os.path.join(BASE_DIR, single_folder)
+            if os.path.isdir(single_item):
+                label_items.append(single_folder)
+    return ','.join(label_items) or "Experiments"
+
+
 def _construct_time_intervals():
     count = 0
     if LOCAL_MAXIMUMS:
-        count = len(LOCAL_MAXIMUMS[0])
+        count = len(LOCAL_MAXIMUMS[0].values()[0])
     time_interval = np.zeros(count)
     increase_on = 0
     for i in xrange(count):
@@ -35,7 +46,7 @@ def _prepare_data():
             target_dir = os.path.join(BASE_DIR, local_dir)
             if os.path.isdir(target_dir) and os.path.exists(target_dir):
                 local_max = _get_one_maximum(target_dir)
-                LOCAL_MAXIMUMS.append(local_max)
+                LOCAL_MAXIMUMS.append({local_dir: local_max})
 
 
 def _get_one_maximum(single_dir_name):
@@ -83,7 +94,10 @@ def _finalise_plot():
 
 def _plot(t):
     plt.figure()
-    plt.plot(t, LOCAL_MAXIMUMS[0], 'or-', t, LOCAL_MAXIMUMS[1], 'Db-', lw=2, label=True)
+    for max_value in LOCAL_MAXIMUMS:
+        for label, data in max_value.iteritems():
+            plt.plot(t, data, label=label, lw=2)
+    # plt.plot(t, LOCAL_MAXIMUMS[0], 'or-', t, LOCAL_MAXIMUMS[1], 'Db-', lw=2, label=_get_label_text())
 
 
 def _show_plot():
@@ -92,6 +106,7 @@ def _show_plot():
 
 def main():
     print 'preparing data to plot'
+    _prepare_data()
     _prepare_data()
 
     print 'constructing time intervals'

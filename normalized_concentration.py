@@ -16,17 +16,6 @@ BASE_DIR = "/Users/lekhnathkhanal/Downloads/Python"
 LOCAL_MAXIMUMS = []
 
 
-def _get_label_text():
-    label_items = []
-    if os.path.exists(BASE_DIR):
-        local_dirs = os.listdir(BASE_DIR)
-        for single_folder in local_dirs:
-            single_item = os.path.join(BASE_DIR, single_folder)
-            if os.path.isdir(single_item):
-                label_items.append(single_folder)
-    return ','.join(label_items) or "Experiments"
-
-
 def _construct_time_intervals():
     count = 0
     if LOCAL_MAXIMUMS:

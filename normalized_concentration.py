@@ -12,7 +12,7 @@ FONT = {
 }
 TIME_INTERVAL = 30
 
-BASE_DIR = "/Users/lekhnathkhanal/Downloads/Python"
+BASE_DIR = ""
 LOCAL_MAXIMUMS = []
 
 
@@ -83,10 +83,10 @@ def _finalise_plot():
 
 def _plot(t):
     plt.figure()
-    for max_value in LOCAL_MAXIMUMS:
-        for label, data in max_value.iteritems():
-            plt.plot(t, data, label=label, lw=2)
-    # plt.plot(t, LOCAL_MAXIMUMS[0], 'or-', t, LOCAL_MAXIMUMS[1], 'Db-', lw=2, label=_get_label_text())
+    # for max_value in LOCAL_MAXIMUMS:
+    #     for label, data in max_value.iteritems():
+    #         plt.plot(t, data, label=label, lw=2)
+    plt.plot(t, LOCAL_MAXIMUMS[0].values()[0], 'or-', t, LOCAL_MAXIMUMS[1].values()[0], 'Db-', lw=2, label=True)
 
 
 def _show_plot():

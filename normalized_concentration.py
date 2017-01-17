@@ -93,6 +93,7 @@ def _plot(t):
     for max_value in LOCAL_MAXIMUMS:
         for label, data in max_value.iteritems():
             plt.plot(t, data, MARKERS[i % markers_count], label=label, lw=2)
+            i += 1
 
 
 def _show_plot():

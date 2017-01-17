@@ -10,31 +10,45 @@ FONT = {
     'weight': 'bold',
     'size': 13
 }
+TIME_INTERVAL = 30
+T = []
 
-filename = 'Dec29_0.075Ta3N5MBPD'
+BASE_DIR = ""
+LOCAL_MAXIMUMS = []
 
-FILE_PATH = "/Users/lekhnathkhanal/Downloads/Python/MBPD/*.txt"
-DIR_LIST = sorted(glob.glob(FILE_PATH))
-y = np.zeros(len(DIR_LIST))
+
+def _construct_time_intervals():
+    count = 0
+    if LOCAL_MAXIMUMS:
+        count = len(LOCAL_MAXIMUMS[0])
+    time_interval = np.zeros(count)
+    increase_on = 0
+    for i in xrange(count):
+        time_interval[i] = increase_on
+        increase_on += TIME_INTERVAL
+    return time_interval
 
 
 def _prepare_data():
-    for i, path in enumerate(DIR_LIST):
-        x = np.genfromtxt(DIR_LIST[i], delimiter=',', skip_header=2, skip_footer=0)
-        PeakAbs = np.max(x[:, 1])
-        print "%s -> %s" % (os.path.basename(path).replace('.txt', ''), PeakAbs)
-        print "------------------"
-        y[i] = PeakAbs
-    locMax = y/max(y)
-    locMax = np.sort(locMax)[::-1]
-    print"################################"
-    print "And the Normalized Concentrations for %s placed in descending order are: %s" % (filename, locMax)
+    local_dirs = os.listdir(BASE_DIR)
+    for local_dir in local_dirs:
+        target_dir = os.path.join(BASE_DIR, local_dir)
+        if os.path.isdir(target_dir) and os.path.exists(target_dir):
+            local_max = _get_one_maximum(target_dir)
+            LOCAL_MAXIMUMS.append(local_max)
 
-    c1 = [1.7, 0.8, 0.8, 0.8, 0.56, 0.23, 0.05, 0.02]
-    c2 = [1.7, .98, 0.98, 0.98, .75, 0.52, 0.3, 0.23]
 
-    t = [0, 30, 60,  90, 120, 150, 180, 210]
-    return c1, c2, t
+def _get_one_maximum(single_dir_name):
+    target_files = glob.glob("%s/*.txt" % single_dir_name)
+    y = np.zeros(len(target_files))
+    for i, path in enumerate(target_files):
+        x = np.genfromtxt(path, delimiter=',', skip_header=2, skip_footer=0)
+        peakabs = np.max(x[:, 1])
+        y[i] = peakabs
+    locmax = y/max(y)
+    locmax = np.sort(locmax)[::-1]
+
+    return locmax
 
 
 def _finalise_plot():
@@ -64,12 +78,12 @@ def _finalise_plot():
     plt.xticks(np.arange(0, 200, 30))
     plt.xlabel('Time, min', fontsize=18, fontweight='bold')
     plt.ylabel('Normalized Concentration, $C_t/C_0$', fontsize=18, fontweight='bold')
-    plt.title("Normalized Concentrations Compared over time for \n %s" % filename, fontsize=20, fontweight='bold')
+    plt.title("Normalized Concentrations Compared over time for \n Dec29_0.075Ta3N5MBPD", fontsize=20, fontweight='bold')
 
 
-def _plot(c1, c2, t):
+def _plot(t):
     plt.figure()
-    plt.plot(t, c2, 'or-', t, c1, 'Db-', lw=2, label=True)
+    plt.plot(t, LOCAL_MAXIMUMS[0], 'or-', t, LOCAL_MAXIMUMS[1], 'Db-', lw=2, label=True)
 
 
 def _show_plot():
@@ -78,10 +92,13 @@ def _show_plot():
 
 def main():
     print 'preparing data to plot'
-    c1, c2, t = _prepare_data()
+    _prepare_data()
 
+    print 'constructing time intervals'
+    t = _construct_time_intervals()
+    print t
     print 'plotting data'
-    _plot(c1, c2, t)
+    _plot(t)
 
     print 'finalising plot'
     _finalise_plot()

@@ -11,9 +11,8 @@ FONT = {
     'size': 13
 }
 TIME_INTERVAL = 30
-T = []
 
-BASE_DIR = ""
+BASE_DIR = "/Users/lekhnathkhanal/Downloads/Python"
 LOCAL_MAXIMUMS = []
 
 
@@ -30,12 +29,13 @@ def _construct_time_intervals():
 
 
 def _prepare_data():
-    local_dirs = os.listdir(BASE_DIR)
-    for local_dir in local_dirs:
-        target_dir = os.path.join(BASE_DIR, local_dir)
-        if os.path.isdir(target_dir) and os.path.exists(target_dir):
-            local_max = _get_one_maximum(target_dir)
-            LOCAL_MAXIMUMS.append(local_max)
+    if os.path.exists(BASE_DIR):
+        local_dirs = os.listdir(BASE_DIR)
+        for local_dir in local_dirs:
+            target_dir = os.path.join(BASE_DIR, local_dir)
+            if os.path.isdir(target_dir) and os.path.exists(target_dir):
+                local_max = _get_one_maximum(target_dir)
+                LOCAL_MAXIMUMS.append(local_max)
 
 
 def _get_one_maximum(single_dir_name):

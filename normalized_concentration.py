@@ -96,7 +96,6 @@ def main():
 
     print 'constructing time intervals'
     t = _construct_time_intervals()
-    print t
     print 'plotting data'
     _plot(t)
 

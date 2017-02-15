@@ -6,13 +6,8 @@ import os
 import glob
 from openpyxl import Workbook
 wb = Workbook()
-ws = wb.active
-#from scipy import stats
-
 
 plt.rcParams['text.latex.preamble'] = [r'\boldmath']
-#plt.rc('font', family='serif', serif='cm10')
-#plt.rc('text', usetex=True)
 FONT = {
     'family': 'Times New Roman',
     'weight': 'bold',
@@ -25,7 +20,7 @@ plt.rcParams['axes.linewidth'] = 2
 
 TIME_INTERVAL = 30
 
-BASE_DIR = "C:\Users\Laxmi Khanal\Desktop\Python\MBPD\Experiments"
+BASE_DIR = ""
 LOCAL_MAXIMUMS = []
 MARKERS = [
     "*b-.",
@@ -68,46 +63,23 @@ def _get_one_maximum(single_dir_name):
         y[i] = peakabs
     locmax = y/max(y)
     locmax = np.sort(locmax)[::-1]
-    print locmax
-    f =[]
-    for i in locmax:
-        f.append(i)
-    rows = [
-        target_files, ["C0/C0", 'C1/C0', 'C2/C0', 'C3/C0', 'C4/C0', 'C5/C0'],
-        f
-    ]
-    
-    for row in rows:
-        ws.append(row)
-    # Save the file
-    wb.save("mbpd.xlsx")
-    #%%
-    peakIllum = locmax[3 :]
+
+    peakIllum = locmax[3:]
     peakIllum = np.max(peakIllum)/peakIllum
     Y = np.log(peakIllum)
     
-    #print 'log(C0/Ct) is:%s' %(Y)
-    IlluTime = np.arange(90, 230, 30)
-    IlluTime = IlluTime[:,np.newaxis]-90
+    illutime = np.arange(90, 230, 30)
+    illutime = illutime[:, np.newaxis]-90
     
-    plt.plot(IlluTime, Y, 'ob-')
-    a, _, _, _ = np.linalg.lstsq(IlluTime, Y)
-    #slope, intercept, r_value, p_value, std_err = stats.linregress(IlluTime,Y)
-    #line = slope*(IlluTime-90)+intercept
-    #print 'R-Squared value: %s' %(r_value)
-    plt.plot(IlluTime, a*IlluTime)
-    plt.axis([0, 125, 0,2.5 ])
+    plt.plot(illutime, Y, 'ob-')
+    a, _, _, _ = np.linalg.lstsq(illutime, Y)
+    plt.plot(illutime, a*illutime)
+    plt.axis([0, 125, 0, 2.5])
     plt.xticks(np.arange(0, 125, 30))
     plt.xlabel(r'Time, min', fontsize=20,fontweight='bold')
     plt.ylabel(r"$ln(C_0/C_t)$", fontsize = 20)
     plt.title("Linearized plots for Normalized Concentrations", fontsize=20, fontweight='bold')
-    #%%
-    
     return locmax
-
-    
-
-    
 
 
 def _finalise_plot():
@@ -132,9 +104,6 @@ def _finalise_plot():
     ax.text(16, 0.95, 'Ads', style='italic',
             bbox={'facecolor': 'red', 'alpha': 0.2, 'pad': 7})
 
-    #plt.annotate('Light On', xy=(90, 0), xytext=(45, 0.3),
-    #            arrowprops=dict(facecolor='black', shrink=0.1))
-
     plt.axis([10, 200, 0, 1])
     plt.xticks(np.arange(0, 200, 30))
     plt.xlabel(r'Time, min', fontsize=20,fontweight='bold')
@@ -156,36 +125,48 @@ def _show_plot():
     plt.show()
 
 
+def _dump_data_into_xl():
+    """
+    dumps data set into a xl sheet
+    :return: None
+    """
+    ws = wb.create_sheet("Experiment Results")
+    sheet_title_list_object = list()
+    sheet_data_list_object = list()
+    for item in LOCAL_MAXIMUMS:
+        sheet_title_list_object.extend(item.keys())
+        for i in item.values():
+            data_item_list = list()
+            for j in i:
+                data_item_list.append("%s" % j)
+            data_item_list = ','.join(data_item_list)
+            sheet_data_list_object.append(data_item_list)
+    sheet_data_list_object = ';'.join(sheet_data_list_object)
+    data_matrix = np.matrix.getT(np.matrix(sheet_data_list_object)).tolist()
+    data_matrix.insert(0, sheet_title_list_object)
+    for data in data_matrix:
+        ws.append(data)
+
+    wb.save("mbpd.xlsx")
+
+
 def main():
     print 'preparing data to plot'
     _prepare_data()
-    
 
     print 'constructing time intervals'
     t = _construct_time_intervals()
     print 'plotting data'
     _plot(t)
-    
 
     print 'finalising plot'
     _finalise_plot()
+
+    print 'dumping data into xl'
+    _dump_data_into_xl()
 
     print 'showing the result'
     _show_plot()
 
 if __name__ == '__main__':
     main()
-"""
-#%%
-from scipy import stats
-import numpy as np
-x = np.random.random(10)
-y = np.random.random(10)
-slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
-# To get coefficient of determination (r_squared)
-
-
-print "r-squared:", r_value**2
-
-#%%
-"""

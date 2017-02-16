@@ -5,7 +5,6 @@ import matplotlib.pylab as plt
 import os
 import glob
 from openpyxl import Workbook
-wb = Workbook()
 
 plt.rcParams['text.latex.preamble'] = [r'\boldmath']
 FONT = {
@@ -20,7 +19,7 @@ plt.rcParams['axes.linewidth'] = 2
 
 TIME_INTERVAL = 30
 
-BASE_DIR = ""
+BASE_DIR = "/Users/lekhnathkhanal/Downloads/Experiments"
 LOCAL_MAXIMUMS = []
 MARKERS = [
     "*b-.",
@@ -90,6 +89,8 @@ def _finalise_plot():
     plt.rcParams['text.latex.preamble'] = [r'\boldmath']
 
     leg = plt.legend(loc=3, handlelength=0.7)
+    if not leg:
+        return
     for legobj in leg.legendHandles:
         legobj.set_linewidth(4.0)
 
@@ -108,7 +109,7 @@ def _finalise_plot():
     plt.xticks(np.arange(0, 200, 30))
     plt.xlabel(r'Time, min', fontsize=20,fontweight='bold')
     plt.ylabel(r"$C_t/C_0$", fontsize = 20)
-    plt.title("Normalized Concentrations Compared over Time", fontsize=20, fontweight='bold')
+    plt.title("Normalized Concentrations Compared Over Time", fontsize=20, fontweight='bold')
 
 
 def _plot(t):
@@ -130,6 +131,7 @@ def _dump_data_into_xl():
     dumps data set into a xl sheet
     :return: None
     """
+    wb = Workbook()
     ws = wb.create_sheet("Experiment Results")
     sheet_title_list_object = list()
     sheet_data_list_object = list()
@@ -142,9 +144,9 @@ def _dump_data_into_xl():
             data_item_list = ','.join(data_item_list)
             sheet_data_list_object.append(data_item_list)
     sheet_data_list_object = ';'.join(sheet_data_list_object)
-    data_matrix = np.matrix.getT(np.matrix(sheet_data_list_object)).tolist()
-    data_matrix.insert(0, sheet_title_list_object)
-    for data in data_matrix:
+    sheet_data_list_object = np.matrix.getT(np.matrix(sheet_data_list_object)).tolist()
+    sheet_data_list_object.insert(0, sheet_title_list_object)
+    for data in sheet_data_list_object:
         ws.append(data)
 
     wb.save("mbpd.xlsx")
@@ -154,6 +156,9 @@ def main():
     print 'preparing data to plot'
     _prepare_data()
 
+    print 'dumping data into xl'
+    _dump_data_into_xl()
+
     print 'constructing time intervals'
     t = _construct_time_intervals()
     print 'plotting data'
@@ -161,9 +166,6 @@ def main():
 
     print 'finalising plot'
     _finalise_plot()
-
-    print 'dumping data into xl'
-    _dump_data_into_xl()
 
     print 'showing the result'
     _show_plot()

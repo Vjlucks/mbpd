@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pylab as plt
 import os
+import sys
 import glob
 from openpyxl import Workbook
 
@@ -152,9 +153,22 @@ def _dump_data_into_xl():
     wb.save("mbpd.xlsx")
 
 
+def _check_continue_dependency():
+    """
+    checks if the data is there, if not system exit.
+    :return: None
+    """
+    if not LOCAL_MAXIMUMS:
+        print 'ERROR: there is no data to work on, exiting'
+        sys.exit(1)
+
+
 def main():
     print 'preparing data to plot'
     _prepare_data()
+
+    print 'confirming before working on data'
+    _check_continue_dependency()
 
     print 'dumping data into xl'
     _dump_data_into_xl()

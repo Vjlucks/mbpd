@@ -159,7 +159,7 @@ def _check_continue_dependency():
     :return: None
     """
     if not LOCAL_MAXIMUMS:
-        print 'ERROR: there is no data to work on, exiting'
+        print 'ERROR: there is no data to work on, exiting, please re-check the BASE_DIR(current=%s)' % BASE_DIR
         sys.exit(1)
 
 

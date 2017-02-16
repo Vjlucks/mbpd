@@ -19,7 +19,7 @@ plt.rcParams['axes.linewidth'] = 2
 
 TIME_INTERVAL = 30
 
-BASE_DIR = "/Users/lekhnathkhanal/Downloads/Experiments"
+BASE_DIR = ""
 LOCAL_MAXIMUMS = []
 MARKERS = [
     "*b-.",

@@ -1,101 +1,156 @@
 # -*- coding: utf-8 -*-
 
-import os
-import operator
+import matplotlib.pylab as plt
 import numpy as np
 import glob
-from matplotlib import pyplot
-from pylab import *
+import random
+import sys
+import os
+
+COLOR_SET = [
+    "k",
+    "g",
+    "r",
+    "b",
+    "c",
+    "y"
+]
+
+BASE_DIR = ""
+
+x_0 = raw_input("Enter Starting x value: ")
+x_l = raw_input("Enter final x value: ")
+ext = raw_input("Are the files xy type or txt?")
+ttl = raw_input("Enter the title: ")
+yaxis = raw_input("Enter the y-axis title: ")
+xaxis = raw_input("Enter the x-axis title: ")
+
+if ext == "xy":
+    delemeter = ''
+else:
+    delemeter = ','
 
 
-font = dict(
-    family='Times New Roman',
-    weight='bold',
-    size=13
-)
-
-matplotlib.rc('font', **font)
-matplotlib.rc('xtick', labelsize=18)
-matplotlib.rc('ytick', labelsize=18)
-matplotlib.rcParams['axes.linewidth'] = 2
-
-FILE_PATH = ""
-
-
-def _format_file_content(files):
+def initialize_plot():
     """
-    removes lines those having no single comma(,)
+        initializes the plot
+        :return: None
+        """
+    font = {
+        'family': 'Times New Roman',
+        'weight': 'bold',
+        'size': 10
+    }
+
+    plt.rc('font', **font)
+    plt.rc('xtick', labelsize=16)
+    plt.rc('ytick', labelsize=16)
+
+    plt.rcParams['axes.linewidth'] = 2
+
+
+def get_filename_from_file_path(file_path):
     """
-    for single_file in files:
-        file_path = os.path.join(FILE_PATH, single_file)
-        new_path = "%s.new" % file_path
-        if os.path.exists(file_path):
-            with open(file_path, 'r+') as original_file:
-                with open(new_path, 'w') as new_file:
-                    for line in original_file.readlines():
-                        slitted_line = line.split(',')
-                        if len(slitted_line) == 2:
-                            new_file.write(line)
-            os.remove(file_path)
-            os.rename(new_path, file_path)
+        returns file name if file_path includes it
+        :param file_path: file path
+        :return: file name, string
+        """
+    file_name = os.path.basename(file_path).replace('%s' % ext, '')
+    return file_name
 
 
-def _get_data_in_ordered_list_to_draw(files):
+def read_target_files():
     """
-    does very minor comparison and returns a list of dict containing file name and peak value
+        reads a directory and returns all the files matching a pattern
+        :return: list
+        """
+    return glob.glob("%s/*.%s" % (BASE_DIR, ext))
+
+
+def get_subplots(count):
     """
-    ordered_dict_label = dict()
-    ordered_dict_data = dict()
-    for single_file in files:
-        label = os.path.basename(single_file).replace('.txt', '')
-        data = np.genfromtxt(single_file, delimiter=',', skip_header=2, skip_footer=0)
-        ordered_dict_data[label] = data
-        ordered_dict_label[label] = max(data[:, 1])
-        print "peak value of %s is %s" % (label, ordered_dict_label[label])
-    ordered_dict_label = sorted(ordered_dict_label.items(), key=operator.itemgetter(1))
-    data_list = list()
-    for label in ordered_dict_label:
-        data_list.append({label[0]: ordered_dict_data[label[0]]})
-    data_list.reverse()
-    return data_list
-
-
-def _update_legend():
+    initializes the plot
+    :return: None
     """
-    updates legends
+    f, sub_plots = plt.subplots(int(count), sharex=True, sharey=True)
+    f.text(0.5, 0.95, '%s' % (ttl), ha='center', va='center', fontsize=18)
+    f.text(0.5, 0.02, '%s' % (xaxis), ha='center', va='center', fontsize=18)
+    f.text(0.09, 0.5, '%s' % (yaxis), ha='center', va='center', rotation='vertical', fontsize=18)
+
+    return sub_plots
+
+
+def arrange_plots(sub_plot, file_path):
     """
-    leg = pyplot.legend(loc="best", handlelength=0.7)
-    for legend_object in leg.legendHandles:
-        legend_object.set_linewidth(4.0)
+    arranges the plot
+    :return: None
+    """
+    file_name = get_filename_from_file_path(file_path)
+    np_object_from_text = np.genfromtxt(file_path, delimiter=delemeter, skip_header=2, skip_footer=0)
+    t = np_object_from_text[:, 0]
+    np_object_from_text = np_object_from_text[:, 1]
+    sub_plot.plot(t, np_object_from_text, label=file_name, color=COLOR_SET[random.randint(0, len(COLOR_SET) - 1)])
+    sub_plot.legend(loc='upper right')
+    plt.xlim(int(x_0), int(x_l))
+
+    plt.yticks([])
+    sub_plot.grid()
+    plt.savefig('XRDPlot.png', bbox_inches='tight')
 
 
-def _plot(target_files):
-    _format_file_content(target_files)
-    prepared_data = _get_data_in_ordered_list_to_draw(target_files)
-    for single_data in prepared_data:
-        for label, data in single_data.iteritems():
-            try:
-                pyplot.plot(data[:, 0], data[:, 1], label=label, lw=2)
-            except Exception, e:
-                print "Couldn't plot data, %s, Label(%s)" % (str(e), label)
-    _update_legend()
-    pyplot.xlim(550, 750)
-    pyplot.ylim(0, 2)
+def arrange_single_plots(file_path_list):
+    """
+    arranges the plot
+    :return: None
+    """
+    for file_path in file_path_list:
+        file_name = get_filename_from_file_path(file_path)
+        np_object_from_text = np.genfromtxt(file_path, delimiter=delemeter, skip_header=2, skip_footer=0)
+        t = np_object_from_text[:, 0]
+        np_object_from_text = np_object_from_text[:, 1]
+        plt.plot(t, np_object_from_text, label=file_name, color=COLOR_SET[random.randint(0, len(COLOR_SET) - 1)])
+        plt.legend(loc='upper right')
+        plt.xlim(int(x_0), int(x_l))
+        plt.yticks([])
+        plt.grid()
+        plt.savefig('XRDPlot.png', bbox_inches='tight')
 
-    pyplot.xlabel('Wavelength, nm', fontsize=18, fontweight='bold')
-    pyplot.ylabel('Absorbance, abs', fontsize=18, fontweight='bold')
-    pyplot.title("$0.075g$ $ Ta_3N_5$ (Inhouse) Assisted $ 5$ $ ppm$ MBPD", fontsize=20, fontweight='bold')
-    pyplot.show()
+
+def show_plot():
+    """
+    plots the plot
+    :return: None
+    """
+    plt.show()
 
 
 def main():
-    print 'generating documents from text file'
-    target_files = glob.glob("%s/*.txt" % FILE_PATH)
+    print 'reading target directory=%s \n' % BASE_DIR
+    file_list = read_target_files()
+    plot_type = raw_input("Do you want stack plots or single?\n").strip()
 
-    print 'plotting data...'
-    _plot(target_files)
-    print 'Done!'
+    print 'initializing plot \n'
+    initialize_plot()
 
+    file_count = len(file_list)
+    if file_count == 0:
+        print "worthless zero subplots, exiting now!"
+        sys.exit(1)
+
+    if plot_type == 'stack':
+        print 'generating subplots\n'
+        sub_plots = get_subplots(file_count)
+
+        print 'Arranging the plots one by one'
+        for index, sub_plot in enumerate(sub_plots):
+                print 'Working with file=%s \n' % file_list[index]
+                arrange_plots(sub_plot, file_list[index])
+    else:
+        arrange_single_plots(file_list)
+
+    print 'Enjoy the Plots.......!!'
+    show_plot()
 
 if __name__ == "__main__":
     main()
+

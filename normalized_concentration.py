@@ -58,7 +58,7 @@ def _get_one_maximum(single_dir_name):
     target_files = glob.glob("%s/*.txt" % single_dir_name)
     y = np.zeros(len(target_files))
     for i, path in enumerate(target_files):
-        x = np.genfromtxt(path, delimiter=',', skip_header=2, skip_footer=0)
+        x = np.genfromtxt(path, delimiter=',', skip_header=2, skip_footer=0, converters={1: lambda s: float(s or 0)})
         peakabs = np.max(x[:, 1])
         y[i] = peakabs
     locmax = y/max(y)

@@ -3,51 +3,31 @@
 import matplotlib.pylab as plt
 import numpy as np
 import glob
-import random
 import sys
 import os
-
+plt.style.use(u'bmh')
 COLOR_SET = [
-    "k",
-    "g",
     "r",
+    "g",
+    "k",
     "b",
-    "c",
-    "y"
+    "k",
+    "g"
 ]
 
 BASE_DIR = ""
-DELEMETER = ','
-X_0 = 0
-X_L = 0
-EXT = ''
-TTL = ''
-Y_AXIS = ''
-X_AXIS = ''
 
+x_0 = raw_input("Enter Starting x value: ")
+x_l = raw_input("Enter final x value: ")
+ext = raw_input("Are the files xy type or txt?")
+ttl = raw_input("Enter the title: ")
+yaxis = raw_input("Enter the y-axis title: ")
+xaxis = raw_input("Enter the x-axis title: ")
 
-def set_variables():
-    """
-    sets default variables
-    :return: None
-    """
-    global X_0
-    global X_L
-    global EXT
-    global TTL
-    global Y_AXIS
-    global X_AXIS
-    global DELEMETER
-
-    X_0 = raw_input("Enter Starting x value: ")
-    X_L = raw_input("Enter final x value: ")
-    EXT = raw_input("Are the files xy type or txt?")
-    TTL = raw_input("Enter the title: ")
-    Y_AXIS = raw_input("Enter the y-axis title: ")
-    X_AXIS = raw_input("Enter the x-axis title: ")
-
-    if EXT == "xy":
-        DELEMETER = ''
+if ext == "xy":
+    delemeter = ''
+else:
+    delemeter = ','
 
 
 def initialize_plot():
@@ -74,7 +54,7 @@ def get_filename_from_file_path(file_path):
         :param file_path: file path
         :return: file name, string
         """
-    file_name = os.path.basename(file_path).replace('%s' % EXT, '')
+    file_name = os.path.basename(file_path).replace('%s' % ext, '')
     return file_name
 
 
@@ -83,7 +63,8 @@ def read_target_files():
         reads a directory and returns all the files matching a pattern
         :return: list
         """
-    return glob.glob("%s/*.%s" % (BASE_DIR, EXT))
+    s = raw_input("File starting with:")
+    return glob.glob("%s/%s*.%s" % (BASE_DIR,s, ext))
 
 
 def get_subplots(count):
@@ -92,48 +73,56 @@ def get_subplots(count):
     :return: None
     """
     f, sub_plots = plt.subplots(int(count), sharex=True, sharey=True)
-    f.text(0.5, 0.95, '%s' % (TTL), ha='center', va='center', fontsize=18)
-    f.text(0.5, 0.02, '%s' % (X_AXIS), ha='center', va='center', fontsize=18)
-    f.text(0.09, 0.5, '%s' % (Y_AXIS), ha='center', va='center', rotation='vertical', fontsize=18)
 
     return sub_plots
 
 
-def arrange_plots(sub_plot, file_path):
+def arrange_plots(sub_plot, file_path_list):
     """
     arranges the plot
     :return: None
     """
-    file_name = get_filename_from_file_path(file_path)
-    np_object_from_text = np.genfromtxt(file_path, delimiter=DELEMETER, skip_header=2, skip_footer=0)
-    t = np_object_from_text[:, 0]
-    np_object_from_text = np_object_from_text[:, 1]
-    sub_plot.plot(t, np_object_from_text, label=file_name, color=COLOR_SET[random.randint(0, len(COLOR_SET) - 1)])
-    sub_plot.legend(loc='upper right')
-    plt.xlim(int(X_0), int(X_L))
-
-    plt.yticks([])
-    sub_plot.grid()
-    plt.savefig('XRDPlot.png', bbox_inches='tight')
-
+    
+    for index, file_path in enumerate(file_path_list):
+        selected_color = COLOR_SET[index]
+        file_name = get_filename_from_file_path(file_path)
+        np_object_from_text = np.genfromtxt(file_path, delimiter=delemeter, skip_header=2, skip_footer=0)
+        t = np_object_from_text[:, 0]
+        np_object_from_text = np_object_from_text[:, 1]
+        sub_plot.plot(t, np_object_from_text, label=file_name, color= selected_color)
+        sub_plot.legend(loc='upper right')
+        plt.xlim(int(x_0), int(x_l))
+        plt.title('%s' %ttl, fontsize = 20)
+        plt.xlabel('%s' %xaxis, fontsize = 20)
+        plt.ylabel('%s' %yaxis, fontsize = 20)
+        plt.yticks([])
+        sub_plot.grid()
+        plt.savefig('XRDPlot.png', bbox_inches='tight')
+        
 
 def arrange_single_plots(file_path_list):
     """
     arranges the plot
     :return: None
     """
-    for file_path in file_path_list:
+    i = 0
+    for index, file_path in enumerate(file_path_list):
+        selected_color = COLOR_SET[index]
         file_name = get_filename_from_file_path(file_path)
-        np_object_from_text = np.genfromtxt(file_path, delimiter=DELEMETER, skip_header=2, skip_footer=0)
+        np_object_from_text = np.genfromtxt(file_path, delimiter=delemeter, skip_header=2, skip_footer=0)
         t = np_object_from_text[:, 0]
         np_object_from_text = np_object_from_text[:, 1]
-        plt.plot(t, np_object_from_text, label=file_name, color=COLOR_SET[random.randint(0, len(COLOR_SET) - 1)])
-        plt.legend(loc='upper right')
-        plt.xlim(int(X_0), int(X_L))
+        np_object_from_text = [b+i for b in np_object_from_text]
+        plt.plot(t, np_object_from_text, label=file_name, color=selected_color)
+        plt.legend(loc=1)
+        plt.xlim(int(x_0), int(x_l))
+        plt.title('%s' %ttl, fontsize = 20)
+        plt.xlabel('%s' %xaxis, fontsize = 20)
+        plt.ylabel('%s' %yaxis, fontsize = 20)
         plt.yticks([])
-        plt.grid()
+        plt.grid(True)
         plt.savefig('XRDPlot.png', bbox_inches='tight')
-
+        i += 10
 
 def show_plot():
     """
@@ -144,9 +133,6 @@ def show_plot():
 
 
 def main():
-    print "reading data from user\n"
-    set_variables()
-
     print 'reading target directory=%s \n' % BASE_DIR
     file_list = read_target_files()
     plot_type = raw_input("Do you want stack plots or single?\n").strip()

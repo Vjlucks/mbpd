@@ -77,19 +77,19 @@ def get_subplots(count):
     return sub_plots
 
 
-def arrange_plots(sub_plot, file_path_list):
+def arrange_plots(sub_plot, file_path_list, index):
     """
     arranges the plot
     :return: None
     """
     
-    for index, file_path in enumerate(file_path_list):
-        selected_color = COLOR_SET[index]
+    for file_path in file_path_list:
+        selected_color = COLOR_SET[len(COLOR_SET) % index]
         file_name = get_filename_from_file_path(file_path)
         np_object_from_text = np.genfromtxt(file_path, delimiter=delemeter, skip_header=2, skip_footer=0)
         t = np_object_from_text[:, 0]
         np_object_from_text = np_object_from_text[:, 1]
-        sub_plot.plot(t, np_object_from_text, label=file_name, color= selected_color)
+        sub_plot.plot(t, np_object_from_text, label=file_name, color=selected_color)
         sub_plot.legend(loc='upper right')
         plt.xlim(int(x_0), int(x_l))
         plt.title('%s' %ttl, fontsize = 20)
@@ -107,7 +107,7 @@ def arrange_single_plots(file_path_list):
     """
     i = 0
     for index, file_path in enumerate(file_path_list):
-        selected_color = COLOR_SET[index]
+        selected_color = COLOR_SET[len(COLOR_SET) % index]
         file_name = get_filename_from_file_path(file_path)
         np_object_from_text = np.genfromtxt(file_path, delimiter=delemeter, skip_header=2, skip_footer=0)
         t = np_object_from_text[:, 0]
@@ -152,7 +152,7 @@ def main():
         print 'Arranging the plots one by one'
         for index, sub_plot in enumerate(sub_plots):
                 print 'Working with file=%s \n' % file_list[index]
-                arrange_plots(sub_plot, file_list[index])
+                arrange_plots(sub_plot, file_list[index], index)
     else:
         arrange_single_plots(file_list)
 
